@@ -14,3 +14,8 @@ https://github.com/fenixlife1978/Sicoven/releases/download/v1.0.9/SICOVEN-Setup-
 ## Despliegue en Vercel
 
 Importar este repositorio en Vercel. No requiere base de datos, variables de entorno, backend ni comandos de build. Framework: Other. Output directory: punto (raíz del proyecto).
+
+
+## Propuesta de valor presentada en la web
+
+La página explica, sin comparaciones absolutas no verificadas, estas capacidades: Asistente Guiado para acompañar el registro paso a paso; Vista Previa de Asientos para revisar cuentas y movimientos antes de contabilizar; importación con detección, validación y previsualización; reversión y contra-asientos con trazabilidad; gestión multiempresa; contabilidad en doble moneda; SQLite local como fuente de verdad; control y aprobación profesional antes de contabilizar; tesorería, auxiliares y conciliación bancaria.
