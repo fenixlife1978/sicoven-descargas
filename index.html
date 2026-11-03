@@ -250,6 +250,26 @@
       const endpoint = "https://crm-sicoven.vercel.app/api/analytics/events";
       const productCode = "SICOVEN_DESKTOP";
       const params = new URLSearchParams(window.location.search);
+      // UTMs have priority. Referrer inference is best-effort; some in-app browsers hide it.
+      const referrerUrl = (() => { try { return document.referrer ? new URL(document.referrer) : null; } catch { return null; } })();
+      const referrerHost = (referrerUrl?.hostname || "").toLowerCase().replace(/^www\./, "");
+      const inferredChannel = (() => {
+        if (referrerHost.includes("whatsapp") || referrerHost.includes("wa.me")) return { source: "whatsapp", medium: "social" };
+        if (referrerHost.includes("facebook") || referrerHost.includes("fb.com")) return { source: "facebook", medium: "social" };
+        if (referrerHost.includes("instagram")) return { source: "instagram", medium: "social" };
+        if (referrerHost.includes("telegram") || referrerHost.includes("t.me")) return { source: "telegram", medium: "social" };
+        if (referrerHost.includes("linkedin")) return { source: "linkedin", medium: "social" };
+        if (referrerHost.includes("tiktok")) return { source: "tiktok", medium: "social" };
+        if (referrerHost.includes("youtube")) return { source: "youtube", medium: "social" };
+        if (referrerHost.includes("google")) return { source: "google", medium: "organic" };
+        if (referrerHost.includes("bing")) return { source: "bing", medium: "organic" };
+        return referrerHost ? { source: referrerHost, medium: "referral" } : { source: "direct", medium: "none" };
+      })();
+      const attribution = {
+        source: params.get("utm_source") || inferredChannel.source,
+        medium: params.get("utm_medium") || inferredChannel.medium,
+        campaign: params.get("utm_campaign") || undefined
+      };
       const getSessionId = () => {
         try {
           let id = sessionStorage.getItem("sicoven_analytics_session");
@@ -268,9 +288,9 @@
           product_code: productCode,
           event_type: eventType,
           session_id: sessionId || undefined,
-          source: params.get("utm_source") || undefined,
-          medium: params.get("utm_medium") || undefined,
-          campaign: params.get("utm_campaign") || undefined,
+          source: attribution.source,
+          medium: attribution.medium,
+          campaign: attribution.campaign,
           landing_path: window.location.pathname,
           referrer: document.referrer || undefined,
           ...extra
