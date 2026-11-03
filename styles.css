@@ -27,28 +27,46 @@ body {
 
 /* Header Top */
 .top {
-  height: 86px;
-  background: linear-gradient(110deg, #031b40, #083c75);
+  min-height: 86px;
+  background: linear-gradient(90deg, #022355 0%, #06408e 50%, #032b66 100%);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 6vw;
+  padding: 8px 6vw;
   color: white;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px rgba(2, 32, 80, 0.35);
 }
 
-.brand {
+.top-inner {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  gap: 20px;
+}
+
+.brand-banner-link {
+  display: inline-flex;
   align-items: center;
   text-decoration: none;
 }
 
-.brand-logo {
-  display: block;
-  width: min(290px, 58vw);
+.header-full-banner {
   height: 68px;
+  width: auto;
+  max-width: min(520px, 78vw);
   object-fit: contain;
-  object-position: left center;
+  display: block;
+  border-radius: 8px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.brand-banner-link:hover .header-full-banner {
+  opacity: 0.96;
+  transform: translateY(-1px);
 }
 
 .trust {
@@ -56,6 +74,7 @@ body {
   font-weight: 500;
   color: #c7e6ff;
   letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 /* Hero Section */
@@ -730,9 +749,9 @@ footer {
     margin: 18px;
     padding: 16px;
   }
-  .brand-logo {
-    width: 220px;
-    height: 54px;
+  .header-full-banner {
+    max-width: 100%;
+    height: 52px;
   }
   .footer-efas-logo {
     height: 42px;
