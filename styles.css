@@ -109,18 +109,14 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 14px;
   background-color: var(--win-blue);
   color: #ffffff;
   text-decoration: none;
   border: none;
   border-radius: 8px;
-  padding: 0 24px;
-  height: 46px;
-  min-height: 46px;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.2px;
+  padding: 10px 24px;
+  min-height: 56px;
   box-shadow: 0 4px 14px rgba(0, 72, 143, 0.3);
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
@@ -145,11 +141,35 @@ body {
 }
 
 .win-btn-icon {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
   color: #ffffff;
   display: block;
+}
+
+.btn-text-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  line-height: 1.25;
+}
+
+.btn-text-wrap b {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #ffffff;
+  display: block;
+}
+
+.btn-text-wrap small {
+  font-size: 11px;
+  font-weight: 500;
+  color: #c9e4ff;
+  display: block;
+  margin-top: 2px;
 }
 
 .secondary {
