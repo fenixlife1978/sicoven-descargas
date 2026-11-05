@@ -8,8 +8,8 @@ SICOVEN es una aplicación de escritorio para Windows. Utiliza SQLite local como
 
 ## Descarga oficial
 
-SICOVEN v1.0.13 · Windows x64:
-https://github.com/fenixlife1978/Sicoven/releases/download/v1.0.13/SICOVEN-Setup-1.0.13-x64.exe
+SICOVEN v1.0.14 · Windows x64:
+https://github.com/fenixlife1978/Sicoven/releases/download/v1.0.14/SICOVEN-Setup-1.0.13-x64.exe
 
 ## Despliegue en Vercel
 
