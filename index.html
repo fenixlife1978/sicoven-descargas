@@ -263,13 +263,15 @@
 
   <script>
     (() => {
-      const RELEASES_API = "https://api.github.com/repos/fenixlife1978/sicoven-descargas/releases?per_page=30";
+      const RELEASES_API = "https://api.github.com/repos/fenixlife1978/sicoven-descargas/releases?per_page=100";
       const status = document.getElementById("updates-status"), latest = document.getElementById("latest-release"), history = document.getElementById("release-history");
       const formatDate = value => { const date = new Date(value); return Number.isNaN(date.getTime()) ? "Fecha no disponible" : new Intl.DateTimeFormat("es-VE", { day:"2-digit", month:"long", year:"numeric" }).format(date); };
-      const installerFor = release => (release.assets || []).find(asset => asset.name.toLowerCase().startsWith("sicoven-setup-") && asset.name.toLowerCase().endsWith("-x64.exe"));
+      const versionParts = tag => (tag || "").replace(/^v/i,"").split(".").map(part => Number.parseInt(part,10));
+      const compareVersions = (a,b) => { const av=versionParts(a.tag_name), bv=versionParts(b.tag_name); for(let i=0;i<3;i++){const delta=(bv[i]||0)-(av[i]||0);if(delta)return delta;} return new Date(b.published_at||0)-new Date(a.published_at||0); };
+      const installerFor = release => (release.assets || []).find(asset => /^sicoven-setup-.*-x64\.exe$/i.test(asset.name));
       const makeLink = (href, label, className = "") => { const link = document.createElement("a"); link.href=href; link.textContent=label; link.className=className; link.target="_blank"; link.rel="noopener noreferrer"; return link; };
       const render = releases => {
-        const published = releases.filter(item => !item.draft && !item.prerelease && /^v?\d+\.\d+\.\d+/.test(item.tag_name || ""));
+        const published = releases.filter(item => !item.draft && !item.prerelease && /^v?\d+\.\d+\.\d+$/.test(item.tag_name || "")).sort(compareVersions);
         if (!published.length) throw new Error("Todavía no hay versiones estables publicadas.");
         const current=published[0], asset=installerFor(current), version=current.tag_name.replace(/^v/i,"");
         latest.replaceChildren();
@@ -290,7 +292,7 @@
         if(published.length===1){const empty=document.createElement("p");empty.textContent="Esta es la primera versión del historial.";history.append(empty);}
         status.textContent="Se encontraron "+published.length+" versiones estables publicadas.";status.classList.add("is-loaded");
       };
-      fetch(RELEASES_API,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"}).then(response=>{if(!response.ok)throw new Error("No fue posible consultar las publicaciones ("+response.status+").");return response.json();}).then(render).catch(error=>{status.textContent="No fue posible cargar el historial en este momento. Inténtalo nuevamente más tarde.";});
+      fetch(RELEASES_API,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"}).then(response=>{if(!response.ok)throw new Error("No fue posible consultar las publicaciones ("+response.status+").");return response.json();}).then(render).catch(error=>{status.textContent="No fue posible consultar GitHub en este momento. Verifica tu conexión o vuelve a intentarlo más tarde.";});
     })();
   </script>
 
