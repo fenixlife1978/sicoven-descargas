@@ -135,47 +135,58 @@ body {
   margin-top: 32px;
 }
 
-/* Windows Installer Download Button (Identical to reference screenshot) */
+/* Botones oficiales de descarga: amarillo de alto contraste + pulso discreto */
+@keyframes sicoven-download-pulse {
+  0%, 100% { box-shadow: 0 5px 18px rgba(255, 213, 46, 0.22), 0 0 0 0 rgba(255, 213, 46, 0.28); }
+  50% { box-shadow: 0 7px 24px rgba(255, 213, 46, 0.34), 0 0 0 7px rgba(255, 213, 46, 0); }
+}
+
 .btn-win-installer {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 14px;
-  background-color: var(--win-blue);
-  color: #ffffff;
+  background: linear-gradient(135deg, #ffe66b 0%, #ffd52e 52%, #ffc400 100%);
+  color: #062957;
   text-decoration: none;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 24px;
-  min-height: 56px;
-  box-shadow: 0 4px 14px rgba(0, 72, 143, 0.3);
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 245, 180, 0.9);
+  border-radius: 10px;
+  padding: 12px 24px;
+  min-height: 60px;
+  box-shadow: 0 5px 18px rgba(255, 213, 46, 0.24);
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+  animation: sicoven-download-pulse 3.2s ease-in-out infinite;
   cursor: pointer;
   box-sizing: border-box;
 }
 
 .btn-win-installer:hover {
-  background-color: var(--win-blue-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(0, 72, 143, 0.45);
-  color: #ffffff;
+  background: linear-gradient(135deg, #fff09a 0%, #ffe052 52%, #ffce24 100%);
+  transform: translateY(-3px) scale(1.015);
+  box-shadow: 0 10px 28px rgba(255, 213, 46, 0.42);
+  color: #041f43;
+  animation-play-state: paused;
 }
 
 .btn-win-installer:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(0, 72, 143, 0.3);
+  transform: translateY(0) scale(0.995);
+  box-shadow: 0 3px 10px rgba(255, 213, 46, 0.25);
 }
 
 .btn-win-installer:focus-visible {
   outline: 3px solid #28d8f3;
-  outline-offset: 3px;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-win-installer { animation: none; transition: none; }
 }
 
 .win-btn-icon {
   width: 24px;
   height: 24px;
   flex: 0 0 24px;
-  color: #ffffff;
+  color: #062957;
   display: block;
 }
 
@@ -189,16 +200,16 @@ body {
 
 .btn-text-wrap b {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.2px;
-  color: #ffffff;
+  color: #062957;
   display: block;
 }
 
 .btn-text-wrap small {
   font-size: 11px;
-  font-weight: 500;
-  color: #c9e4ff;
+  font-weight: 600;
+  color: #173d68;
   display: block;
   margin-top: 2px;
 }
@@ -776,8 +787,9 @@ footer {
 .release-history-item { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 17px 20px; background: #fff; border: 1px solid #d8e6f4; border-radius: 13px; }
 .release-history-item h4 { margin: 0 0 5px; color: var(--ink); font-size: 16px; }
 .release-history-item p { margin: 0; color: var(--muted); font-size: 12px; }
-.release-history-link { flex: 0 0 auto; color: #075da9; font-weight: 800; text-decoration: none; }
-.release-history-link:hover, .release-details-link:hover { text-decoration: underline; }
+.release-history-link { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 10px 17px; border-radius: 9px; border: 1px solid #f2c72b; background: linear-gradient(135deg, #ffe66b, #ffd52e 60%, #ffc400); color: #062957; font-weight: 800; text-decoration: none; box-shadow: 0 3px 12px rgba(255, 213, 46, .18); transition: transform .2s ease, box-shadow .2s ease; }
+.release-history-link:hover { transform: translateY(-2px); box-shadow: 0 7px 18px rgba(255, 213, 46, .32); text-decoration: none; }
+.release-details-link:hover { text-decoration: underline; }
 .updates-footnote { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 20px 0 0; text-align: center; }
 @media (max-width: 640px) {
   .updates-section { padding: 54px 5vw; }
