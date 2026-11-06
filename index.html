@@ -53,7 +53,7 @@
           </a>
           <a class="secondary" href="#por-que-elegir">¿Por qué elegir SICOVEN? ↓</a>
         </div>
-        <p class="micro">Última versión disponible · Windows 64 bits · Instalador oficial en GitHub Releases</p>
+        <p class="micro">Última versión disponible · Windows 64 bits · Instalador oficial desde SICOVEN-DESCARGAS</p>
       </div>
 
       <div class="product-card">
@@ -234,7 +234,7 @@
               <small>Última versión disponible · Windows 64 bits</small>
             </span>
           </a>
-          <span class="cta-note">Instalador oficial .exe en GitHub Releases</span>
+          <span class="cta-note">Instalador oficial .exe desde SICOVEN-DESCARGAS</span>
         </div>
       </div>
     </section>
@@ -255,7 +255,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <small>© <span id="year"></span> SICOVEN. Todos los derechos reservados. Instalador oficial publicado en GitHub Releases.</small>
+        <small>© <span id="year"></span> SICOVEN. Todos los derechos reservados. Instalador oficial distribuido desde SICOVEN-DESCARGAS.</small>
       </div>
     </div>
   </footer>
@@ -264,7 +264,6 @@
   <script>
     (() => {
       const RELEASES_API = "https://api.github.com/repos/fenixlife1978/sicoven-descargas/releases?per_page=30";
-      const RELEASES_PAGE = "https://github.com/fenixlife1978/sicoven-descargas/releases";
       const status = document.getElementById("updates-status"), latest = document.getElementById("latest-release"), history = document.getElementById("release-history");
       const formatDate = value => { const date = new Date(value); return Number.isNaN(date.getTime()) ? "Fecha no disponible" : new Intl.DateTimeFormat("es-VE", { day:"2-digit", month:"long", year:"numeric" }).format(date); };
       const installerFor = release => (release.assets || []).find(asset => asset.name.toLowerCase().startsWith("sicoven-setup-") && asset.name.toLowerCase().endsWith("-x64.exe"));
@@ -279,20 +278,19 @@
         const title=document.createElement("h3"); title.textContent="SICOVEN "+current.tag_name;
         const date=document.createElement("p"); date.className="release-date"; date.textContent="Publicada el "+formatDate(current.published_at);
         top.append(label,title,date);
-        const notes=document.createElement("p"); notes.className="release-notes"; notes.textContent=(current.body||"Consulta los detalles de esta versión en GitHub.").trim();
+        const notes=document.createElement("p"); notes.className="release-notes"; notes.textContent=(current.body||"Esta versión está disponible para descarga.").trim();
         const actions=document.createElement("div"); actions.className="release-actions";
         if(asset){
           actions.append(makeLink(asset.browser_download_url,"Descargar SICOVEN para Windows","btn-win-installer"));
           const size=document.createElement("small"); size.className="release-size"; size.textContent="Instalador x64 · "+(asset.size?(asset.size/1048576).toFixed(1)+" MB":"Tamaño no disponible"); actions.append(size);
           document.querySelectorAll("[data-release-download]").forEach(link=>{link.href=asset.browser_download_url;link.querySelector("small")?.replaceChildren(document.createTextNode("SICOVEN v"+version+" · Windows 64 bits"));});
         } else { actions.append(makeLink(current.html_url,"Ver publicación y descargas","btn-win-installer")); document.querySelectorAll("[data-release-download]").forEach(link=>link.href=current.html_url); }
-        const details=makeLink(current.html_url,"Ver notas completas de la versión"); details.className="release-details-link"; actions.append(details);
         latest.append(top,notes,actions); latest.hidden=false; history.replaceChildren();
         published.slice(1).forEach(release=>{const row=document.createElement("article");row.className="release-history-item";const info=document.createElement("div"),name=document.createElement("h4"),date=document.createElement("p");name.textContent="SICOVEN "+release.tag_name;date.textContent=formatDate(release.published_at);info.append(name,date);const oldAsset=installerFor(release);row.append(info,makeLink(oldAsset?oldAsset.browser_download_url:release.html_url,oldAsset?"Descargar":"Ver versión","release-history-link"));history.append(row);});
         if(published.length===1){const empty=document.createElement("p");empty.textContent="Esta es la primera versión del historial.";history.append(empty);}
         status.textContent="Se encontraron "+published.length+" versiones estables publicadas.";status.classList.add("is-loaded");
       };
-      fetch(RELEASES_API,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"}).then(response=>{if(!response.ok)throw new Error("No fue posible consultar las publicaciones ("+response.status+").");return response.json();}).then(render).catch(error=>{status.textContent=error.message+" Puedes consultar el historial directamente en GitHub.";const fallback=makeLink(RELEASES_PAGE,"Abrir historial oficial de versiones");fallback.className="release-details-link";status.append(" ",fallback);});
+      fetch(RELEASES_API,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"}).then(response=>{if(!response.ok)throw new Error("No fue posible consultar las publicaciones ("+response.status+").");return response.json();}).then(render).catch(error=>{status.textContent="No fue posible cargar el historial en este momento. Inténtalo nuevamente más tarde.";});
     })();
   </script>
 
