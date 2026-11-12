@@ -274,14 +274,13 @@
       const downloadButtons = [...document.querySelectorAll("[data-release-download]")];
       let lastCheckedAt = 0;
       let inFlight = false;
-      let currentVersion = "";
+      let currentVersion = "1.0.30";
 
       const setSafeDownloadFallback = () => {
         downloadButtons.forEach(link => {
           if (!link.dataset.lastVerifiedHref) link.href = LATEST_RELEASE_URL;
         });
       };
-      setSafeDownloadFallback();
 
       const formatDate = value => {
         const date = new Date(value);
