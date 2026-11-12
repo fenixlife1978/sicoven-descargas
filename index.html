@@ -263,36 +263,186 @@
 
   <script>
     (() => {
+      "use strict";
       const RELEASES_API = "https://api.github.com/repos/fenixlife1978/sicoven-descargas/releases?per_page=100";
-      const status = document.getElementById("updates-status"), latest = document.getElementById("latest-release"), history = document.getElementById("release-history");
-      const formatDate = value => { const date = new Date(value); return Number.isNaN(date.getTime()) ? "Fecha no disponible" : new Intl.DateTimeFormat("es-VE", { day:"2-digit", month:"long", year:"numeric" }).format(date); };
-      const versionParts = tag => (tag || "").replace(/^v/i,"").split(".").map(part => Number.parseInt(part,10));
-      const compareVersions = (a,b) => { const av=versionParts(a.tag_name), bv=versionParts(b.tag_name); for(let i=0;i<3;i++){const delta=(bv[i]||0)-(av[i]||0);if(delta)return delta;} return new Date(b.published_at||0)-new Date(a.published_at||0); };
-      const installerFor = release => (release.assets || []).find(asset => /^sicoven-setup-.*-x64\.exe$/i.test(asset.name));
-      const makeLink = (href, label, className = "") => { const link = document.createElement("a"); link.href=href; link.textContent=label; link.className=className; link.target="_blank"; link.rel="noopener noreferrer"; return link; };
-      const render = releases => {
-        const published = releases.filter(item => !item.draft && !item.prerelease && /^v?\d+\.\d+\.\d+$/.test(item.tag_name || "")).sort(compareVersions);
-        if (!published.length) throw new Error("Todavía no hay versiones estables publicadas.");
-        const current=published[0], asset=installerFor(current), version=current.tag_name.replace(/^v/i,"");
-        latest.replaceChildren();
-        const top=document.createElement("div"); top.className="latest-release-top";
-        const label=document.createElement("span"); label.className="release-kicker"; label.textContent="VERSIÓN MÁS RECIENTE";
-        const title=document.createElement("h3"); title.textContent="SICOVEN "+current.tag_name;
-        const date=document.createElement("p"); date.className="release-date"; date.textContent="Publicada el "+formatDate(current.published_at);
-        top.append(label,title,date);
-        const notes=document.createElement("p"); notes.className="release-notes"; notes.textContent=(current.body||"Esta versión está disponible para descarga.").trim();
-        const actions=document.createElement("div"); actions.className="release-actions";
-        if(asset){
-          actions.append(makeLink(asset.browser_download_url,"Descargar SICOVEN para Windows","btn-win-installer"));
-          const size=document.createElement("small"); size.className="release-size"; size.textContent="Instalador x64 · "+(asset.size?(asset.size/1048576).toFixed(1)+" MB":"Tamaño no disponible"); actions.append(size);
-          document.querySelectorAll("[data-release-download]").forEach(link=>{link.href=asset.browser_download_url;link.querySelector("small")?.replaceChildren(document.createTextNode("SICOVEN v"+version+" · Windows 64 bits"));});
-        } else { actions.append(makeLink(current.html_url,"Ver publicación y descargas","btn-win-installer")); document.querySelectorAll("[data-release-download]").forEach(link=>link.href=current.html_url); }
-        latest.append(top,notes,actions); latest.hidden=false; history.replaceChildren();
-        published.slice(1).forEach(release=>{const row=document.createElement("article");row.className="release-history-item";const info=document.createElement("div"),name=document.createElement("h4"),date=document.createElement("p");name.textContent="SICOVEN "+release.tag_name;date.textContent=formatDate(release.published_at);info.append(name,date);const oldAsset=installerFor(release);row.append(info,makeLink(oldAsset?oldAsset.browser_download_url:release.html_url,oldAsset?"Descargar":"Ver versión","release-history-link"));history.append(row);});
-        if(published.length===1){const empty=document.createElement("p");empty.textContent="Esta es la primera versión del historial.";history.append(empty);}
-        status.textContent="Se encontraron "+published.length+" versiones estables publicadas.";status.classList.add("is-loaded");
+      const LATEST_RELEASE_URL = "https://github.com/fenixlife1978/sicoven-descargas/releases/latest";
+      const POLL_INTERVAL_MS = 120000;
+      const MIN_FOCUS_REFRESH_MS = 30000;
+      const status = document.getElementById("updates-status");
+      const latest = document.getElementById("latest-release");
+      const history = document.getElementById("release-history");
+      const downloadButtons = [...document.querySelectorAll("[data-release-download]")];
+      let lastCheckedAt = 0;
+      let inFlight = false;
+      let currentVersion = "";
+
+      const setSafeDownloadFallback = () => {
+        downloadButtons.forEach(link => {
+          link.href = LATEST_RELEASE_URL;
+          const small = link.querySelector("small");
+          if (small) small.textContent = "Consultar última versión · Windows 64 bits";
+        });
       };
-      fetch(RELEASES_API,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"}).then(response=>{if(!response.ok)throw new Error("No fue posible consultar las publicaciones ("+response.status+").");return response.json();}).then(render).catch(error=>{status.textContent="No fue posible consultar GitHub en este momento. Verifica tu conexión o vuelve a intentarlo más tarde.";});
+      setSafeDownloadFallback();
+
+      const formatDate = value => {
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? "Fecha no disponible" :
+          new Intl.DateTimeFormat("es-VE", { day:"2-digit", month:"long", year:"numeric" }).format(date);
+      };
+      const versionParts = tag => (tag || "").replace(/^v/i, "").split(".").map(part => Number.parseInt(part, 10) || 0);
+      const compareVersions = (a, b) => {
+        const av = versionParts(a.tag_name), bv = versionParts(b.tag_name);
+        for (let i = 0; i < 3; i++) {
+          const delta = (bv[i] || 0) - (av[i] || 0);
+          if (delta) return delta;
+        }
+        return new Date(b.published_at || 0) - new Date(a.published_at || 0);
+      };
+      const installerFor = release => (release.assets || []).find(asset =>
+        /^sicoven-setup-.*-x64\.exe$/i.test(asset.name)
+      );
+      const makeLink = (href, label, className = "") => {
+        const link = document.createElement("a");
+        link.href = href;
+        link.textContent = label;
+        link.className = className;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        return link;
+      };
+
+      const render = releases => {
+        const published = releases
+          .filter(item => !item.draft && !item.prerelease && /^v?\d+\.\d+\.\d+$/.test(item.tag_name || ""))
+          .sort(compareVersions);
+        if (!published.length) throw new Error("No hay versiones estables publicadas.");
+
+        const current = published[0];
+        const asset = installerFor(current);
+        const version = current.tag_name.replace(/^v/i, "");
+        const versionChanged = currentVersion !== version;
+        currentVersion = version;
+
+        latest.replaceChildren();
+        const top = document.createElement("div");
+        top.className = "latest-release-top";
+        const label = document.createElement("span");
+        label.className = "release-kicker";
+        label.textContent = "VERSIÓN MÁS RECIENTE";
+        const title = document.createElement("h3");
+        title.textContent = "SICOVEN " + current.tag_name;
+        const date = document.createElement("p");
+        date.className = "release-date";
+        date.textContent = "Publicada el " + formatDate(current.published_at);
+        top.append(label, title, date);
+
+        const notes = document.createElement("p");
+        notes.className = "release-notes";
+        notes.textContent = (current.body || "Esta versión está disponible para descarga.").trim();
+        const actions = document.createElement("div");
+        actions.className = "release-actions";
+        const downloadUrl = asset ? asset.browser_download_url : current.html_url;
+
+        if (asset) {
+          actions.append(makeLink(downloadUrl, "Descargar SICOVEN para Windows", "btn-win-installer"));
+          const size = document.createElement("small");
+          size.className = "release-size";
+          size.textContent = "Instalador x64 · " + (asset.size ? (asset.size / 1048576).toFixed(1) + " MB" : "Tamaño no disponible");
+          actions.append(size);
+        } else {
+          actions.append(makeLink(current.html_url, "Ver publicación y descargas", "btn-win-installer"));
+        }
+
+        downloadButtons.forEach(link => {
+          link.href = downloadUrl;
+          const small = link.querySelector("small");
+          if (small) small.textContent = asset
+            ? "SICOVEN v" + version + " · Windows 64 bits"
+            : "SICOVEN v" + version + " · Ver descargas oficiales";
+          link.setAttribute("aria-label", asset
+            ? "Descargar SICOVEN versión " + version + " para Windows de 64 bits"
+            : "Ver descargas oficiales de SICOVEN versión " + version);
+        });
+
+        latest.append(top, notes, actions);
+        latest.hidden = false;
+        history.replaceChildren();
+
+        published.slice(1).forEach(release => {
+          const row = document.createElement("article");
+          row.className = "release-history-item";
+          const info = document.createElement("div");
+          const name = document.createElement("h4");
+          const releaseDate = document.createElement("p");
+          name.textContent = "SICOVEN " + release.tag_name;
+          releaseDate.textContent = formatDate(release.published_at);
+          info.append(name, releaseDate);
+          const oldAsset = installerFor(release);
+          row.append(info, makeLink(
+            oldAsset ? oldAsset.browser_download_url : release.html_url,
+            oldAsset ? "Descargar" : "Ver versión",
+            "release-history-link"
+          ));
+          history.append(row);
+        });
+
+        if (published.length === 1) {
+          const empty = document.createElement("p");
+          empty.textContent = "Esta es la primera versión del historial.";
+          history.append(empty);
+        }
+        status.textContent = "Versión vigente: SICOVEN " + current.tag_name +
+          " · Comprobación automática activa.";
+        status.classList.add("is-loaded");
+        status.classList.remove("is-error");
+        if (versionChanged && !latest.hidden) {
+          latest.setAttribute("data-version-updated", String(Date.now()));
+        }
+      };
+
+      const refreshReleases = async () => {
+        if (inFlight || document.visibilityState === "hidden" && lastCheckedAt) return;
+        inFlight = true;
+        status.textContent = currentVersion
+          ? "Comprobando si existe una versión más reciente…"
+          : "Consultando la versión oficial vigente…";
+        try {
+          const response = await fetch(RELEASES_API + "&_=" + Date.now(), {
+            method: "GET",
+            headers: { Accept: "application/vnd.github+json", "Cache-Control": "no-cache" },
+            cache: "no-store",
+            credentials: "omit"
+          });
+          if (!response.ok) throw new Error("GitHub respondió " + response.status);
+          const releases = await response.json();
+          if (!Array.isArray(releases)) throw new Error("Respuesta de versiones no válida");
+          render(releases);
+          lastCheckedAt = Date.now();
+        } catch (error) {
+          console.warn("[SICOVEN releases] No se pudo actualizar la versión:", error);
+          setSafeDownloadFallback();
+          status.textContent = "No se pudo verificar la versión en este momento. El botón abre las publicaciones oficiales para evitar ofrecer un instalador desactualizado.";
+          status.classList.add("is-error");
+        } finally {
+          inFlight = false;
+        }
+      };
+
+      refreshReleases();
+      window.setInterval(refreshReleases, POLL_INTERVAL_MS);
+      window.addEventListener("focus", () => {
+        if (Date.now() - lastCheckedAt >= MIN_FOCUS_REFRESH_MS) refreshReleases();
+      });
+      window.addEventListener("pageshow", () => {
+        if (Date.now() - lastCheckedAt >= MIN_FOCUS_REFRESH_MS) refreshReleases();
+      });
+      window.addEventListener("online", refreshReleases);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && Date.now() - lastCheckedAt >= MIN_FOCUS_REFRESH_MS) {
+          refreshReleases();
+        }
+      });
     })();
   </script>
 
