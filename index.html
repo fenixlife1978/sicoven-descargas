@@ -42,13 +42,13 @@
         <p class="lead">Software contable multiempresa desarrollado para facilitar el trabajo del contador público venezolano, integrando herramientas que hacen que los procesos contables sean más organizados, comprensibles y eficientes.</p>
         
         <div class="hero-actions">
-          <a class="btn-win-installer" href="https://github.com/fenixlife1978/sicoven-descargas/releases/latest" data-release-download>
+          <a class="btn-win-installer" href="https://github.com/fenixlife1978/sicoven-descargas/releases/download/v1.0.30/SICOVEN-Setup-1.0.30-x64.exe" data-release-download>
             <svg class="win-btn-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
               <path d="M1 4.2 10.5 2.9v8.4H1V4.2ZM12 2.7L23 1v10.3H12V2.7ZM1 12.8h9.5v8.4L1 19.8v-7Zm11 0h11V23l-11-1.5v-8.7Z"/>
             </svg>
             <span class="btn-text-wrap">
               <b>DESCARGAR INSTALADOR</b>
-              <small>Última versión disponible · Windows 64 bits</small>
+              <small>SICOVEN v1.0.30 · Windows 64 bits</small>
             </span>
           </a>
           <a class="secondary" href="#por-que-elegir">¿Por qué elegir SICOVEN? ↓</a>
@@ -78,7 +78,7 @@
         </div>
         <div id="updates-status" class="updates-status" role="status" aria-live="polite">Consultando versiones publicadas…</div>
         <div id="latest-release" class="latest-release" hidden></div>
-        <div class="release-history-wrap"><h3>Historial de versiones</h3><div id="release-history" class="release-history"></div></div>
+        <div class="release-history-wrap"><h3>Historial de versiones</h3><div id="release-history" class="release-history"><article class="release-history-item"><div><h4>SICOVEN v1.0.30</h4><p>Última versión estable conocida · 12 de noviembre de 2026</p></div><a class="release-history-link" href="https://github.com/fenixlife1978/sicoven-descargas/releases/tag/v1.0.30" target="_blank" rel="noopener noreferrer">Ver versión</a></article></div></div>
         <p class="updates-footnote">Las versiones y sus instaladores se obtienen directamente de las publicaciones oficiales de SICOVEN. Descarga siempre desde esta página.</p>
       </div>
     </section>
@@ -264,7 +264,7 @@
   <script>
     (() => {
       "use strict";
-      const RELEASES_API = "https://api.github.com/repos/fenixlife1978/sicoven-descargas/releases?per_page=100";
+      const RELEASES_API = "/api/releases";
       const LATEST_RELEASE_URL = "https://github.com/fenixlife1978/sicoven-descargas/releases/latest";
       const POLL_INTERVAL_MS = 120000;
       const MIN_FOCUS_REFRESH_MS = 30000;
@@ -278,9 +278,7 @@
 
       const setSafeDownloadFallback = () => {
         downloadButtons.forEach(link => {
-          link.href = LATEST_RELEASE_URL;
-          const small = link.querySelector("small");
-          if (small) small.textContent = "Consultar última versión · Windows 64 bits";
+          if (!link.dataset.lastVerifiedHref) link.href = LATEST_RELEASE_URL;
         });
       };
       setSafeDownloadFallback();
@@ -356,6 +354,7 @@
 
         downloadButtons.forEach(link => {
           link.href = downloadUrl;
+          link.dataset.lastVerifiedHref = downloadUrl;
           const small = link.querySelector("small");
           if (small) small.textContent = asset
             ? "SICOVEN v" + version + " · Windows 64 bits"
@@ -408,11 +407,11 @@
           ? "Comprobando si existe una versión más reciente…"
           : "Consultando la versión oficial vigente…";
         try {
-          const response = await fetch(RELEASES_API + "&_=" + Date.now(), {
+          const response = await fetch(RELEASES_API, {
             method: "GET",
-            headers: { Accept: "application/vnd.github+json", "Cache-Control": "no-cache" },
-            cache: "no-store",
-            credentials: "omit"
+            headers: { Accept: "application/json" },
+            cache: "default",
+            credentials: "same-origin"
           });
           if (!response.ok) throw new Error("GitHub respondió " + response.status);
           const releases = await response.json();
@@ -421,8 +420,9 @@
           lastCheckedAt = Date.now();
         } catch (error) {
           console.warn("[SICOVEN releases] No se pudo actualizar la versión:", error);
-          setSafeDownloadFallback();
-          status.textContent = "No se pudo verificar la versión en este momento. El botón abre las publicaciones oficiales para evitar ofrecer un instalador desactualizado.";
+          status.textContent = currentVersion
+            ? "No se pudo consultar una actualización ahora. Se conserva la última versión verificada: SICOVEN v" + currentVersion + ". El historial y los enlaces siguen disponibles."
+            : "No se pudo consultar el servicio de versiones. Se conserva la última versión publicada conocida; vuelve a comprobarse automáticamente.";
           status.classList.add("is-error");
         } finally {
           inFlight = false;
