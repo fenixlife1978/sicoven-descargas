@@ -78,7 +78,7 @@
         </div>
         <div id="updates-status" class="updates-status" role="status" aria-live="polite">Consultando versiones publicadas…</div>
         <div id="latest-release" class="latest-release" hidden></div>
-        <div class="release-history-wrap"><h3>Historial de versiones</h3><div id="release-history" class="release-history"><article class="release-history-item"><div><h4>SICOVEN v1.0.30</h4><p>Última versión estable conocida · 12 de noviembre de 2026</p></div><a class="release-history-link" href="https://github.com/fenixlife1978/sicoven-descargas/releases/tag/v1.0.30" target="_blank" rel="noopener noreferrer">Ver versión</a></article></div></div>
+        <div class="release-history-wrap"><button id="toggle-release-history" class="release-history-toggle" type="button" aria-expanded="false" aria-controls="release-history"><span>Ver Historial de Versiones</span><span class="release-history-chevron" aria-hidden="true">⌄</span></button><div id="release-history" class="release-history" hidden><article class="release-history-item"><div><h4>SICOVEN v1.0.30</h4><p>Última versión estable conocida · 12 de noviembre de 2026</p></div><a class="release-history-link" href="https://github.com/fenixlife1978/sicoven-descargas/releases/tag/v1.0.30" target="_blank" rel="noopener noreferrer">Ver versión</a></article></div></div>
         <p class="updates-footnote">Las versiones y sus instaladores se obtienen directamente de las publicaciones oficiales de SICOVEN. Descarga siempre desde esta página.</p>
       </div>
     </section>
@@ -271,6 +271,15 @@
       const status = document.getElementById("updates-status");
       const latest = document.getElementById("latest-release");
       const history = document.getElementById("release-history");
+      const historyToggle = document.getElementById("toggle-release-history");
+      historyToggle.addEventListener("click", () => {
+        const expanded = historyToggle.getAttribute("aria-expanded") === "true";
+        historyToggle.setAttribute("aria-expanded", String(!expanded));
+        history.hidden = expanded;
+        historyToggle.querySelector("span").textContent = expanded
+          ? "Ver Historial de Versiones"
+          : "Ocultar Historial de Versiones";
+      });
       const downloadButtons = [...document.querySelectorAll("[data-release-download]")];
       let lastCheckedAt = 0;
       let inFlight = false;
@@ -366,6 +375,7 @@
         latest.append(top, notes, actions);
         latest.hidden = false;
         history.replaceChildren();
+        history.hidden = historyToggle.getAttribute("aria-expanded") !== "true";
 
         published.slice(1).forEach(release => {
           const row = document.createElement("article");
