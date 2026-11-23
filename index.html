@@ -42,13 +42,13 @@
         <p class="lead">Software contable multiempresa desarrollado para facilitar el trabajo del contador público venezolano, integrando herramientas que hacen que los procesos contables sean más organizados, comprensibles y eficientes.</p>
         
         <div class="hero-actions">
-          <a class="btn-win-installer" href="https://github.com/fenixlife1978/sicoven-descargas/releases/download/v1.0.30/SICOVEN-Setup-1.0.30-x64.exe" data-release-download>
+          <a class="btn-win-installer" href="https://github.com/fenixlife1978/sicoven-descargas/releases/download/v1.1.0/SICOVEN-Setup-1.1.0-x64.exe" data-release-download>
             <svg class="win-btn-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
               <path d="M1 4.2 10.5 2.9v8.4H1V4.2ZM12 2.7L23 1v10.3H12V2.7ZM1 12.8h9.5v8.4L1 19.8v-7Zm11 0h11V23l-11-1.5v-8.7Z"/>
             </svg>
             <span class="btn-text-wrap">
               <b>DESCARGAR INSTALADOR</b>
-              <small>SICOVEN v1.0.30 · Windows 64 bits</small>
+              <small>SICOVEN v1.1.0 · Windows 64 bits</small>
             </span>
           </a>
           <a class="secondary" href="#por-que-elegir">¿Por qué elegir SICOVEN? ↓</a>
@@ -78,7 +78,7 @@
         </div>
         <div id="updates-status" class="updates-status" role="status" aria-live="polite">Consultando versiones publicadas…</div>
         <div id="latest-release" class="latest-release" hidden></div>
-        <div class="release-history-wrap"><button id="toggle-release-history" class="release-history-toggle" type="button" aria-expanded="false" aria-controls="release-history"><span>Ver Historial de Versiones</span><span class="release-history-chevron" aria-hidden="true">⌄</span></button><div id="release-history" class="release-history" hidden><article class="release-history-item"><div><h4>SICOVEN v1.0.30</h4><p>Última versión estable conocida · 12 de noviembre de 2026</p></div><a class="release-history-link" href="https://github.com/fenixlife1978/sicoven-descargas/releases/tag/v1.0.30" target="_blank" rel="noopener noreferrer">Ver versión</a></article></div></div>
+        <div class="release-history-wrap"><button id="toggle-release-history" class="release-history-toggle" type="button" aria-expanded="false" aria-controls="release-history"><span>Ver Historial de Versiones</span><span class="release-history-chevron" aria-hidden="true">⌄</span></button><div id="release-history" class="release-history" hidden><article class="release-history-item"><div><h4>SICOVEN v1.0.37</h4><p>Versión anterior · 19 de noviembre de 2026</p></div><a class="release-history-link" href="https://github.com/fenixlife1978/sicoven-descargas/releases/tag/v1.0.37" target="_blank" rel="noopener noreferrer">Ver versión</a></article></div></div>
         <p class="updates-footnote">Las versiones y sus instaladores se obtienen directamente de las publicaciones oficiales de SICOVEN. Descarga siempre desde esta página.</p>
       </div>
     </section>
@@ -283,7 +283,7 @@
       const downloadButtons = [...document.querySelectorAll("[data-release-download]")];
       let lastCheckedAt = 0;
       let inFlight = false;
-      let currentVersion = "1.0.30";
+      let currentVersion = "1.1.0";
 
       const setSafeDownloadFallback = () => {
         downloadButtons.forEach(link => {
